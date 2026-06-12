@@ -1,25 +1,19 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.7.0"
-  if OS.mac?
-    if Hardware::CPU.arm?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.7.0/comemory-aarch64-apple-darwin.tar.xz"
-      sha256 "916ffe03b6d8b29793014d4b66b499d2de972ac5136d271081494a55f8f1ae2c"
-    end
-    if Hardware::CPU.intel?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.7.0/comemory-x86_64-apple-darwin.tar.xz"
-      sha256 "17aa5b6554628e5a47fde4f0a8c695b69703b7afda9db1a81d9ad48098a1a751"
-    end
+  version "0.8.0"
+  if OS.mac? && Hardware::CPU.arm?
+    url "https://github.com/Falconiere/comemory/releases/download/v0.8.0/comemory-aarch64-apple-darwin.tar.xz"
+    sha256 "40ac86a56b96eb52ac002adea24d2ba9e616e26f5befd9a9b2fd82987b0fd020"
   end
   if OS.linux?
     if Hardware::CPU.arm?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.7.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "3ef89132ef2f327d7ac75efd98fc635fbd33a81510a23e0e5b4ce978d962f121"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.8.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "1b7337a7e4072d1145d91955ee38902cbde36b7917d3bf691ed08a1ce5c8090e"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.7.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "5b4edbd379fed77ab6bf866d2c2ee4788c226f3afecd4d9b2f69b2fec1457607"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.8.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "83c8444f19738837a17e83e1f23325f5aafac8564f0d9ec1f4cf7998dbf00bb1"
     end
   end
   license "MIT"
@@ -27,7 +21,6 @@ class Comemory < Formula
   BINARY_ALIASES = {
     "aarch64-apple-darwin":      {},
     "aarch64-unknown-linux-gnu": {},
-    "x86_64-apple-darwin":       {},
     "x86_64-unknown-linux-gnu":  {},
   }.freeze
 
@@ -48,7 +41,6 @@ class Comemory < Formula
 
   def install
     bin.install "comemory" if OS.mac? && Hardware::CPU.arm?
-    bin.install "comemory" if OS.mac? && Hardware::CPU.intel?
     bin.install "comemory" if OS.linux? && Hardware::CPU.arm?
     bin.install "comemory" if OS.linux? && Hardware::CPU.intel?
 
