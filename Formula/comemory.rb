@@ -1,27 +1,15 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.10.0"
+  version "0.10.1"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/comemory/releases/download/v0.10.0/comemory-aarch64-apple-darwin.tar.xz"
-    sha256 "9737e74d62e6c1c0d7adac2608086d4d07743ce4a62b2d6e57fd10c88aca0507"
-  end
-  if OS.linux?
-    if Hardware::CPU.arm?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.10.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "37dfa115fe992415b50b2ade24ea60fc35b463b8ca9bc5e62a8f69e54334520d"
-    end
-    if Hardware::CPU.intel?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.10.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "7880d7544f3e8ebe099f971bfb7c7364ac1a8d550fa6dffdac0bf04753d22db7"
-    end
+    url "https://github.com/Falconiere/comemory/releases/download/v0.10.1/comemory-aarch64-apple-darwin.tar.xz"
+    sha256 "4939f1a43723464ba9e9f372a8bad32fcd292f54b87d8e0d88d2983b321876c5"
   end
   license "MIT"
 
   BINARY_ALIASES = {
-    "aarch64-apple-darwin":      {},
-    "aarch64-unknown-linux-gnu": {},
-    "x86_64-unknown-linux-gnu":  {},
+    "aarch64-apple-darwin": {},
   }.freeze
 
   def target_triple
@@ -41,8 +29,6 @@ class Comemory < Formula
 
   def install
     bin.install "comemory" if OS.mac? && Hardware::CPU.arm?
-    bin.install "comemory" if OS.linux? && Hardware::CPU.arm?
-    bin.install "comemory" if OS.linux? && Hardware::CPU.intel?
 
     install_binary_aliases!
 
