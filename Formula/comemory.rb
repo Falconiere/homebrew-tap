@@ -1,16 +1,18 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.11.1"
-  if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/comemory/releases/download/v0.11.1/comemory-aarch64-apple-darwin.tar.xz"
-    sha256 "2b0473a3e3d73269a9fa15c513a68d1c0b3c3399ebfafe476817fb9ef88f7e43"
+  version "0.12.0"
+  if OS.mac?
+    if Hardware::CPU.arm?
+      url "https://github.com/Falconiere/comemory/releases/download/v0.12.0/comemory-aarch64-apple-darwin.tar.xz"
+      sha256 "fa124aabac60bc0994fbaeabd7d3230dd37560b754ad2a721d1d2102e74bf388"
+    end
   end
   license "MIT"
 
   BINARY_ALIASES = {
-    "aarch64-apple-darwin": {},
-  }.freeze
+    "aarch64-apple-darwin": {}
+  }
 
   def target_triple
     cpu = Hardware::CPU.arm? ? "aarch64" : "x86_64"
@@ -28,7 +30,9 @@ class Comemory < Formula
   end
 
   def install
-    bin.install "comemory" if OS.mac? && Hardware::CPU.arm?
+    if OS.mac? && Hardware::CPU.arm?
+      bin.install "comemory"
+    end
 
     install_binary_aliases!
 
