@@ -1,10 +1,10 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.12.1"
+  version "0.13.0"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/comemory/releases/download/v0.12.1/comemory-aarch64-apple-darwin.tar.xz"
-    sha256 "735f5d7a9379cb68704acb5f37e26154a358676c7454de6c47a09daed34aaf75"
+    url "https://github.com/Falconiere/comemory/releases/download/v0.13.0/comemory-aarch64-apple-darwin.tar.xz"
+    sha256 "912eacdb77589a2b39c6d32966a6927e6bbcfb8af92daf755a14f16a15e78d7f"
   end
   license "MIT"
 
