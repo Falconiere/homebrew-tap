@@ -1,15 +1,27 @@
 class GitBetter < Formula
   desc "Token-lean git companion for humans and LLM agents"
   homepage "https://github.com/Falconiere/git-better"
-  version "1.0.1"
+  version "1.0.2"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/git-better/releases/download/v1.0.1/git-better-aarch64-apple-darwin.tar.xz"
-    sha256 "992bc5346289f180b87e6880fcf69393ebfbb4294ee4f19f086773eebcc06f32"
+    url "https://github.com/Falconiere/git-better/releases/download/v1.0.2/git-better-aarch64-apple-darwin.tar.xz"
+    sha256 "1de4468543ef52fd6936522262a84b6e77905846da69bde7c3fdb473fceccf20"
+  end
+  if OS.linux?
+    if Hardware::CPU.arm?
+      url "https://github.com/Falconiere/git-better/releases/download/v1.0.2/git-better-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "d12f0250ecb825ba835a71bac1a8493325b1684179d72dd5872666e507cc1da5"
+    end
+    if Hardware::CPU.intel?
+      url "https://github.com/Falconiere/git-better/releases/download/v1.0.2/git-better-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "1280a101781fc778d5f9873af46e0de7238f757fe8e47ed01f141cccf56364b2"
+    end
   end
   license "MIT"
 
   BINARY_ALIASES = {
-    "aarch64-apple-darwin": {},
+    "aarch64-apple-darwin":      {},
+    "aarch64-unknown-linux-gnu": {},
+    "x86_64-unknown-linux-gnu":  {},
   }.freeze
 
   def target_triple
@@ -29,6 +41,8 @@ class GitBetter < Formula
 
   def install
     bin.install "gb" if OS.mac? && Hardware::CPU.arm?
+    bin.install "gb" if OS.linux? && Hardware::CPU.arm?
+    bin.install "gb" if OS.linux? && Hardware::CPU.intel?
 
     install_binary_aliases!
 
