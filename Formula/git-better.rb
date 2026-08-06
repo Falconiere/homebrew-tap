@@ -1,10 +1,10 @@
 class GitBetter < Formula
   desc "Token-lean git companion for humans and LLM agents"
   homepage "https://github.com/Falconiere/git-better"
-  version "1.0.0"
+  version "1.0.1"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/git-better/releases/download/v1.0.0/git-better-aarch64-apple-darwin.tar.xz"
-    sha256 "8dae72cc9e30aae1bb860245b0e08a79140ef51a79532662b3ad210da61b8149"
+    url "https://github.com/Falconiere/git-better/releases/download/v1.0.1/git-better-aarch64-apple-darwin.tar.xz"
+    sha256 "992bc5346289f180b87e6880fcf69393ebfbb4294ee4f19f086773eebcc06f32"
   end
   license "MIT"
 
