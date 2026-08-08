@@ -1,28 +1,28 @@
 class TooluRunner < Formula
   desc "Standalone self-hosted GitHub Actions JIT runner"
   homepage "https://github.com/Falconiere/toolu-ghrunner"
-  version "0.6.3"
+  version "0.7.0"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.6.3/toolu-runner-darwin-arm64.tar.gz"
-      sha256 "6c6fb93b208146a872dfa5705228d7392348a09e314e225231372177964097ad"
+      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.7.0/toolu-runner-darwin-arm64.tar.gz"
+      sha256 "14984847ed56e5caceeae669c5779ebbe2a1deed581f1f89ee0167ca59cd45cf"
     end
     on_intel do
-      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.6.3/toolu-runner-darwin-amd64.tar.gz"
-      sha256 "76bb4442d2ec87121546a2d3071c27d5bc0394fd3b72fc99dafd6ec3bbedc7ae"
+      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.7.0/toolu-runner-darwin-amd64.tar.gz"
+      sha256 "ef438091e6e5b4f3758d510b99f3b06027a478915c26d006125f7b0869b402e2"
     end
   end
 
   on_linux do
     on_intel do
-      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.6.3/toolu-runner-linux-amd64.tar.gz"
-      sha256 "d599acc077f3ee9ac2854fdcc315fe3ebae119ca110d902464cd48964fae488b"
+      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.7.0/toolu-runner-linux-amd64.tar.gz"
+      sha256 "7dd982757f53434b0ea6f22711442cc64aa3f696c87592ff9dc3d05d6e9ed284"
     end
     on_arm do
-      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.6.3/toolu-runner-linux-arm64.tar.gz"
-      sha256 "82c5ea6128bd5cce28533a011767de3da1372f84f97a29cee63b0396fe7608f7"
+      url "https://github.com/Falconiere/toolu-ghrunner/releases/download/v0.7.0/toolu-runner-linux-arm64.tar.gz"
+      sha256 "6420aee7ae6486faebb9a0e93ff8c395f8ec9187fc1abbba65756b0dbf414ae4"
     end
   end
 
