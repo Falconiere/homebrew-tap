@@ -1,19 +1,19 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.16.0"
+  version "0.16.1"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/comemory/releases/download/v0.16.0/comemory-aarch64-apple-darwin.tar.xz"
-    sha256 "a39c2809807f3ea6e03cda127af2065d9211c44240a9066f3f1167156eabbe95"
+    url "https://github.com/Falconiere/comemory/releases/download/v0.16.1/comemory-aarch64-apple-darwin.tar.xz"
+    sha256 "0209597bc7245c40c461b84a0c02a0ec32cc81ca71ac9229897a0d8515545291"
   end
   if OS.linux?
     if Hardware::CPU.arm?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.16.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "3ab68a420a55d662de3772a2a708048d8d2b6bfbb7aa2dd0298deadf4057ef0b"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.16.1/comemory-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "7823c009b1f41f451d54a9612a964495def2dc2eeda4526aea3745c507c6d7ac"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.16.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "e8be7745b2d6eec217fdc1d4df1ff6d84bc3cb5c66369c290bc1743cbdcdca29"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.16.1/comemory-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "aaa27413ef9d80c6140cf0107b051c8a0fa4fcc6217f000ae83fe99db0bc2bff"
     end
   end
   license "MIT"
@@ -40,9 +40,15 @@ class Comemory < Formula
   end
 
   def install
-    bin.install "comemory" if OS.mac? && Hardware::CPU.arm?
-    bin.install "comemory" if OS.linux? && Hardware::CPU.arm?
-    bin.install "comemory" if OS.linux? && Hardware::CPU.intel?
+    if OS.mac? && Hardware::CPU.arm?
+      bin.install "comemory"
+    end
+    if OS.linux? && Hardware::CPU.arm?
+      bin.install "comemory"
+    end
+    if OS.linux? && Hardware::CPU.intel?
+      bin.install "comemory"
+    end
 
     install_binary_aliases!
 
