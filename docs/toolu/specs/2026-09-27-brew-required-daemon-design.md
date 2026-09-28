@@ -108,16 +108,34 @@ proves the limitation.
   `#` after indentation marks a comment). The `caveats` region runs from
   `def caveats` to the first line at the same indentation that is exactly
   `end`.
-- `bash scripts/test-formula-contract.sh [--release-formula PATH]` is the
-  contract test. It fetches the latest release's `comemory.rb` with `gh` when no
-  path is given.
-- `bash scripts/test-brew-lifecycle.sh --native|--headless` is the lifecycle
-  test. Env: `CI` / `COMEMORY_DISPOSABLE_ENV`, `TAP_DIR` (defaults to the repo
+- `bash scripts/test-formula-contract.sh [--release-formula PATH] [--fixtures-only]`
+  is the contract test. It fetches the latest release's `comemory.rb` with `gh`
+  when no path is given.
+  - Fixture cases: the raw release asset, the v0.51.0 publisher output
+    (`git show 51f149b:Formula/comemory.rb`), and boundary copies of both.
+  - Repository cases: committed `Formula/comemory.rb` passes `check`, and the
+    README carries the AC-7 statements. `--fixtures-only` skips these.
+- `bash scripts/test-brew-lifecycle.sh --native|--headless|--self-test` is the
+  lifecycle test. `--self-test` is a syntax and consistency check only: it
+  verifies that the script refuses to run outside a disposable environment
+  (exit 2). It proves no AC. Env: `CI` / `COMEMORY_DISPOSABLE_ENV`, `TAP_DIR` (defaults to the repo
   root). Exit 0 means every scenario passed. Each scenario prints
   `PASS <name>` or `FAIL <name>: <reason>`.
+- `bash scripts/check-ci-run.sh <workflow-file> <sha> <expected-jobs>` is
+  delivery evidence. It selects the newest `push` run of the workflow at that
+  SHA and polls every 30 s (`gh run view --json`) until it completes, for at
+  most 90 min by default (override with `CI_RUN_TIMEOUT_SECS`). It then requires
+  exactly `<expected-jobs>` jobs, each concluding `success`, and prints each
+  job's name and conclusion.
+  - Exit 0: all jobs succeeded.
+  - Exit 1: the run failed, the job count is wrong, a job concluded otherwise,
+    or no run exists after a 5 min grace period.
+  - Exit 2: bad arguments or a `gh` error persisting across 3 consecutive polls.
 - `.github/workflows/lifecycle.yml` has jobs `contract` (ubuntu) and
-  `brew-lifecycle` (the matrix above). Triggers: `pull_request`, `push` to
-  `main`, `workflow_dispatch`.
+  `brew-lifecycle` (the matrix above). Triggers: `push` to any
+  branch, which covers the PR head and `main`, including release-bot pushes,
+  plus `workflow_dispatch`. `pull_request` is omitted so no run is
+  duplicated.
 
 ## Failure modes and edge cases
 
@@ -161,7 +179,7 @@ proves the limitation.
 
 ## Acceptance criteria
 
-- **AC-1 (H-1, partially — manual step; H-2):** Given the real formula, `brew install` prints caveats
+- **AC-1:** (H-1, partially — manual step; H-2) Given the real formula, `brew install` prints caveats
   naming `<prefix>/opt/comemory/bin/comemory sync daemon ensure` and starts no
   service. Then that exact command returns `ready:true` with
   `daemon.version` equal to the formula version, `daemon.binary` equal to
@@ -170,28 +188,28 @@ proves the limitation.
   exist, and the user never authenticated. H-1's automatic invocation "after
   binary installation" is impossible inside Homebrew (see Problem). The formula
   names the command, and the PR must not claim that H-1 is met automatically.
-- **AC-2 (H-2):** A formula whose legacy `post_install` runs `ensure` does not
+- **AC-2:** (H-2) A formula whose legacy `post_install` runs `ensure` does not
   produce a ready daemon for the real `$HOME/.comemory`, and leaves no unit
   there.
-- **AC-3 (H-3):** With pending operations queued, `brew reinstall` followed by
+- **AC-3:** (H-3) With pending operations queued, `brew reinstall` followed by
   `ensure` restarts on the new file: pid and `binary_file` change, the old pid
   is gone, there is one coordinator, and the snapshot is identical.
-- **AC-4 (H-3):** With pending operations queued, a `brew upgrade` that changes
+- **AC-4:** (H-3) With pending operations queued, a `brew upgrade` that changes
   the Cellar keg, followed by `comemory upgrade --json`, reports
   `daemon.ready:true`. The binary is the new keg file, no process runs the old
   keg path, there is one coordinator and one unit, and the snapshot is
   identical.
-- **AC-5 (H-4):** `check` fails on the real raw release `comemory.rb` and names
+- **AC-5:** (H-4) `check` fails on the real raw release `comemory.rb` and names
   the missing caveats and completions. `apply` then `check` passes, and a second
   `apply` is idempotent. `check` passes on committed `Formula/comemory.rb`, and
   CI runs it on every push to `main` and every PR. H-4 is detected in tap CI
   only after the push. The pre-publish gate lands only with F-1, and the PR
   states this.
-- **AC-6 (H-5):** `comemory sync daemon uninstall` then `brew uninstall
+- **AC-6:** (H-5) `comemory sync daemon uninstall` then `brew uninstall
   comemory` leaves zero comemory units and zero coordinators, with the data
   snapshot and memory files intact. `brew uninstall` alone leaves the unit
   behind; this is detected and documented, not hidden.
-- **AC-7 (H-6):** README states:
+- **AC-7:** (H-6) README states:
   - the supported post-install readiness commands;
   - that the Homebrew channel does not fully support immediate required-daemon
     start (a release blocker for claiming it);
@@ -221,6 +239,13 @@ the missing caveats line.
   `docs/guides/upgrading.md` and `docs/scenarios/install.md`.
 - The formula caveats themselves (user-facing text).
 - Follow-ups F-1 to F-3 in the PR body for the epic owner.
+
+## Revisions after approval
+
+- Plan review, 2026-09-27: added `--fixtures-only`, `--self-test`, and the
+  README checks inside the contract test, and switched the trigger from
+  `pull_request` to push on any branch. Plan review round 2 added the
+  `check-ci-run.sh` contract. The contract and ACs are unchanged.
 
 ## Open Questions
 

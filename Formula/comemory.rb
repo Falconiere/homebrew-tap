@@ -66,4 +66,18 @@ class Comemory < Formula
     # sample files.
     pkgshare.install(*leftover_contents) unless leftover_contents.empty?
   end
+
+  def caveats
+    <<~EOS
+      comemory needs its sync daemon running, and Homebrew cannot start it:
+      formula hooks run sandboxed, without access to your home directory.
+      After every install, upgrade or reinstall, start and verify it with:
+        #{opt_bin}/comemory sync daemon ensure
+      `comemory upgrade` upgrades through Homebrew and verifies the daemon.
+      Any other comemory command also restarts a missing daemon.
+      Before `brew uninstall comemory`, remove the service with:
+        comemory sync daemon uninstall
+      This never deletes your data directory (~/.comemory by default).
+    EOS
+  end
 end
