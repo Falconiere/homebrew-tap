@@ -1,19 +1,19 @@
 class Comemory < Formula
   desc "Agentic dev memory + code-aware semantic search via a two-layer property graph."
   homepage "https://github.com/Falconiere/comemory"
-  version "0.50.0"
+  version "0.51.0"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://github.com/Falconiere/comemory/releases/download/v0.50.0/comemory-aarch64-apple-darwin.tar.xz"
-    sha256 "3c1e8d9157c10bdeeb81509e637762a87b6b6a5192bab89d6c906f63bf4da659"
+    url "https://github.com/Falconiere/comemory/releases/download/v0.51.0/comemory-aarch64-apple-darwin.tar.xz"
+    sha256 "496f395677432564e38c48511ef963b30f8bc47777de3a656fa6ef2c85e87c85"
   end
   if OS.linux?
     if Hardware::CPU.arm?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.50.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "114e8eacc27fbf8915d9a7f6d94cc19d94ca95af93c7b97fb7a7d8eda7ba118d"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.51.0/comemory-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "eab78a6fd03f30c0530e5a6115ababfbdfae2da4c92a71f56812e63e600e0bca"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/Falconiere/comemory/releases/download/v0.50.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "26806d18eecfdc326662ffa3ecf0d0f7161d2b0df6ed32b402e1de097b6bcd4e"
+      url "https://github.com/Falconiere/comemory/releases/download/v0.51.0/comemory-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "2ef11533c4a53ad86e1b00a550c9d2a3a7329f92d0b0fd28047fc7484cb83a18"
     end
   end
   license "MIT"
