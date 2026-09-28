@@ -247,13 +247,28 @@ the missing caveats line.
   `pull_request` to push on any branch. Plan review round 2 added the
   `check-ci-run.sh` contract. The contract and ACs are unchanged.
 
+## Hook probe evidence (CI run 36365607407)
+
+On macos-15, ubuntu-22.04 native and headless, a legacy `post_install` that
+runs `comemory sync daemon ensure --json` completes, and `brew install` exits 0,
+with `ensure` reporting success. However, it ran with
+`HOME=/private/tmp/.../comemory-hook-probe-postinstall-*` (or `/var/tmp/...`),
+so the daemon it verified serves a throwaway data directory. The user's
+`~/.comemory` had no daemon and no unit. A formula hook would therefore claim
+readiness falsely, which H-2 forbids.
+
 ## Open Questions
 
-- Q-1: Does engine preflight alone, via an ordinary command after `brew upgrade`,
-  move the daemon to the new keg when brew keeps the old keg? Owner: this
-  worker; observed in CI. Non-blocking: AC-4 asserts the supported
-  `comemory upgrade` path, and the preflight observation is recorded as evidence
-  for F-2.
+- Q-1 (resolved by CI runs 36365419520 and 36365607407): after `brew upgrade` to a new keg,
+  engine preflight alone moves the daemon only when brew has cleaned up the old
+  keg.
+  - On macOS 14 and 15 the old keg was kept, and after an ordinary command the daemon
+    still ran `Cellar/comemory/0.51.0/bin/comemory`.
+  - On Linux the old keg was removed, and preflight moved the daemon to
+    `0.51.0_1`.
+  - In both cases `comemory upgrade` settled the daemon on the new keg (AC-4).
+    This is evidence for F-2: a same-version coordinator on an old, surviving
+    keg is accepted.
 - Q-2: Follow-ups F-1 to F-3 need comemory-repo changes. Owner: epic
   orchestrator/owner. Non-blocking for this PR. Until F-1 lands, the next
   release push drops the caveats and tap CI flags it.
