@@ -284,8 +284,9 @@ readiness falsely, which H-2 forbids.
     - Preflight replaces a coordinator on a keg that `opt` no longer names.
     - Units run the `opt` link.
     - A real-brew keg-upgrade test covers macOS, Linux and headless.
-- F-4 (new, reported to the orchestrator): an intermittent macOS race in the
-  engine's `supervisor::bootstrap_or_replace`.
+- F-4 is [Falconiere/comemory#314](https://github.com/Falconiere/comemory/pull/314),
+  which the orchestrator requires before this PR merges. It fixes an
+  intermittent macOS race in the engine's `supervisor::bootstrap_or_replace`.
   - What happens: after `brew reinstall`, the evicted coordinator's label is
     still loaded. `launchctl bootout` returns before launchd finishes, so the
     immediate re-`bootstrap` fails with `5: Input/output error`. The process
@@ -293,5 +294,8 @@ readiness falsely, which H-2 forbids.
     exits 69.
   - Frequency: seen once in three macos-15 runs (tap run 36368419887, attempt
     1; the rerun was green).
-  - Owner: the engine. It is non-blocking for this PR, whose `reinstall`
-    scenario stays strict and reports it.
+  - The fix waits, with a bound, until `launchctl print gui/<uid>/<label>`
+    fails before re-bootstrapping. A real-launchd test repeats the eviction
+    and re-bootstrap path 25 times.
+  - This tap's `reinstall` scenario stays strict. Until a release carries the
+    fix, the released engine the formula installs can still hit the race.
