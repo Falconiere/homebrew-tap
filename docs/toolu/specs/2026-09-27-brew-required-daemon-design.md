@@ -269,6 +269,29 @@ readiness falsely, which H-2 forbids.
   - In both cases `comemory upgrade` settled the daemon on the new keg (AC-4).
     This is evidence for F-2: a same-version coordinator on an old, surviving
     keg is accepted.
-- Q-2: Follow-ups F-1 to F-3 need comemory-repo changes. Owner: epic
-  orchestrator/owner. Non-blocking for this PR. Until F-1 lands, the next
-  release push drops the caveats and tap CI flags it.
+- Q-2 (resolved; the orchestrator authorized comemory PRs, and this tap PR
+  merges after them):
+  - F-1 and F-3 are
+    [Falconiere/comemory#311](https://github.com/Falconiere/comemory/pull/311).
+    - `release.yml` applies and then checks `scripts/comemory_formula.rb`
+      before committing the formula.
+    - The real step runs in CI against a tap clone.
+    - It adds the `homebrew` / `release-formula` replication cases and rows
+      H-1…H-6.
+  - F-2 is
+    [Falconiere/comemory#312](https://github.com/Falconiere/comemory/pull/312),
+    merged.
+    - Preflight replaces a coordinator on a keg that `opt` no longer names.
+    - Units run the `opt` link.
+    - A real-brew keg-upgrade test covers macOS, Linux and headless.
+- F-4 (new, reported to the orchestrator): an intermittent macOS race in the
+  engine's `supervisor::bootstrap_or_replace`.
+  - What happens: after `brew reinstall`, the evicted coordinator's label is
+    still loaded. `launchctl bootout` returns before launchd finishes, so the
+    immediate re-`bootstrap` fails with `5: Input/output error`. The process
+    fallback then loses `daemon.lock` to the dying coordinator, and `ensure`
+    exits 69.
+  - Frequency: seen once in three macos-15 runs (tap run 36368419887, attempt
+    1; the rerun was green).
+  - Owner: the engine. It is non-blocking for this PR, whose `reinstall`
+    scenario stays strict and reports it.
