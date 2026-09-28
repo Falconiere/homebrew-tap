@@ -60,8 +60,8 @@ There are three parts, all in this tap:
      a cargo-dist-generated formula. It tolerates a file that already has
      completions.
    - `check FILE` exits non-zero and lists each missing or forbidden element.
-   - It runs in tap CI on every PR and on every push to `main`, including the
-     release bot's pushes, which a GitHub App token does trigger. A regeneration
+   - It runs in tap CI on every push to any branch (so on every PR head) and to
+     `main`, including the release bot's pushes, which a GitHub App token does trigger. A regeneration
      that drops the contract therefore turns the release commit red instead of
      passing silently (H-4).
    - It also runs against the **real** raw formula asset from the latest
@@ -202,7 +202,7 @@ proves the limitation.
 - **AC-5:** (H-4) `check` fails on the real raw release `comemory.rb` and names
   the missing caveats and completions. `apply` then `check` passes, and a second
   `apply` is idempotent. `check` passes on committed `Formula/comemory.rb`, and
-  CI runs it on every push to `main` and every PR. H-4 is detected in tap CI
+  CI runs it on every push to any branch, which covers PR heads and `main`. H-4 is detected in tap CI
   only after the push. The pre-publish gate lands only with F-1, and the PR
   states this.
 - **AC-6:** (H-5) `comemory sync daemon uninstall` then `brew uninstall

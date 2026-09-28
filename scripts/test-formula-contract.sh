@@ -126,6 +126,18 @@ cp "$work/applied.rb" "$work/service.rb"
 insert_before_class_end "$work/service.rb" $'\n  service do\n    run [opt_bin/"comemory", "--version"]\n  end\n'
 expect_check "service block is rejected" "$work/service.rb" fail "contract: service block is forbidden"
 
+# Each required caveats statement and the shell list, removed one at a time.
+for needle in '#{opt_bin}/comemory sync daemon ensure' 'comemory upgrade' 'comemory sync daemon uninstall'; do
+  slug="$(printf '%s' "$needle" | tr -c '[:lower:]' '-')"
+  cp "$work/applied.rb" "$work/missing-$slug.rb"
+  ruby -e 'p, n = ARGV; s = File.read(p); s.gsub!(n, "the daemon step") || abort("needle absent: #{n}"); File.write(p, s)' \
+    "$work/missing-$slug.rb" "$needle"
+  expect_check "caveats without '$needle' are rejected" "$work/missing-$slug.rb" fail "contract: caveats must mention"
+done
+cp "$work/applied.rb" "$work/two-shells.rb"
+ruby -e 'p = ARGV[0]; s = File.read(p); s.sub!("shells: [:bash, :zsh, :fish, :pwsh]", "shells: [:bash, :zsh]") || abort("no shells"); File.write(p, s)' "$work/two-shells.rb"
+expect_check "completions for fewer shells are rejected" "$work/two-shells.rb" fail "contract: completions must cover"
+
 grep -vF 'install_binary_aliases!' "$work/raw.rb" >"$work/no-anchor.rb"
 expect_apply_fails "apply refuses a formula without the completions anchor" "$work/no-anchor.rb" \
   "anchor"

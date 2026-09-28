@@ -14,7 +14,7 @@ these commands after every install, upgrade and reinstall.
 # Install, then start and verify the daemon
 # (Homebrew 7 loads formulae from third-party taps only after `brew trust`)
 brew tap Falconiere/tap
-brew trust --formula falconiere/tap/comemory
+brew trust --formula Falconiere/tap/comemory
 brew install Falconiere/tap/comemory
 "$(brew --prefix)/opt/comemory/bin/comemory" sync daemon ensure
 
