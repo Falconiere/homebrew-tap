@@ -1,0 +1,89 @@
+# Keeps the comemory formula's required-daemon contract honest (homebrew-tap#1).
+#
+# `contract` runs on every push, including the release bot's formula pushes
+# (made with a GitHub App token, so they trigger workflows). A cargo-dist
+# regeneration that drops the completions or the lifecycle caveats therefore
+# turns that commit red instead of passing silently.
+#
+# `brew-lifecycle` drives real `brew install/reinstall/upgrade/uninstall` of
+# this tap on disposable runners with native launchd, native systemd --user,
+# and headless Linux. It checks readiness and data preservation through the
+# engine's own `sync daemon` JSON (scripts/test-brew-lifecycle.sh).
+name: lifecycle
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lifecycle-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  contract:
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Check the committed formula
+        run: ruby scripts/comemory_formula.rb check Formula/comemory.rb
+      - name: Fetch the raw formula of the latest comemory release
+        run: gh release download --repo Falconiere/comemory --pattern comemory.rb --dir "$RUNNER_TEMP/release"
+      - name: Contract test (real release formula, publisher output, README)
+        run: bash scripts/test-formula-contract.sh --release-formula "$RUNNER_TEMP/release/comemory.rb"
+      - name: Lint scripts
+        run: shellcheck scripts/*.sh scripts/lib/*.sh
+      - name: brew style with the publisher's exceptions
+        run: |
+          set -euo pipefail
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew tap falconiere/tap "$GITHUB_WORKSPACE"
+          brew style --except-cops FormulaAudit/Homepage,FormulaAudit/Desc,FormulaAuditStrict falconiere/tap/comemory
+
+  brew-lifecycle:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: macos-15, mode: native }
+          - { os: ubuntu-22.04, mode: native }
+          - { os: ubuntu-22.04, mode: headless }
+    runs-on: ${{ matrix.os }}
+    env:
+      COMEMORY_INDEXING_AUTO_REINDEX: "off"
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+      - name: Put Homebrew on PATH (Linux)
+        if: runner.os == 'Linux'
+        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+      - name: Update Homebrew to current
+        run: brew update
+      - name: Require the launchd GUI domain
+        if: runner.os == 'macOS'
+        run: launchctl print "gui/$(id -u)" >/dev/null
+      - name: Start a systemd user manager
+        if: runner.os == 'Linux' && matrix.mode == 'native'
+        run: |
+          set -euo pipefail
+          sudo loginctl enable-linger "$USER"
+          uid="$(id -u)"
+          for _ in $(seq 1 30); do
+            [ -S "/run/user/$uid/bus" ] && break
+            sleep 1
+          done
+          echo "XDG_RUNTIME_DIR=/run/user/$uid" >> "$GITHUB_ENV"
+          echo "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$uid/bus" >> "$GITHUB_ENV"
+      - name: Require systemd --user
+        if: runner.os == 'Linux' && matrix.mode == 'native'
+        run: systemctl --user show-environment >/dev/null
+      - name: Run the brew lifecycle suite
+        run: bash scripts/test-brew-lifecycle.sh --${{ matrix.mode }}
