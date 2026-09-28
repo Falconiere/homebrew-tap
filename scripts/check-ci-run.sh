@@ -11,7 +11,10 @@
 #   2  bad arguments, or a `gh` error on 3 consecutive polls
 set -euo pipefail
 
-[ $# -eq 3 ] && [[ "$3" =~ ^[0-9]+$ ]] || { echo "usage: $0 <workflow-file> <sha> <expected-jobs>" >&2; exit 2; }
+if [ $# -ne 3 ] || ! [[ "$3" =~ ^[0-9]+$ ]]; then
+  echo "usage: $0 <workflow-file> <sha> <expected-jobs>" >&2
+  exit 2
+fi
 workflow="$1" sha="$2" want="$3"
 timeout="${CI_RUN_TIMEOUT_SECS:-5400}"
 start="$(date +%s)"

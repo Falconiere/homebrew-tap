@@ -68,7 +68,7 @@ There are three parts, all in this tap:
      comemory release, in the form the next release will publish.
 3. **Real-brew lifecycle test: `scripts/test-brew-lifecycle.sh`.** It is driven
    by `.github/workflows/lifecycle.yml` on disposable runners:
-   - `macos-14`, native launchd;
+   - `macos-15`, native launchd (Homebrew 7 marks macOS 14 unsupported);
    - `ubuntu-22.04`, native `systemd --user` with linger;
    - `ubuntu-22.04`, headless, expecting the `process` supervisor.
 

@@ -123,7 +123,7 @@ contract test → lifecycle script → workflow proven by the HEAD push run
   },
   {
     "id": "S6-workflow",
-    "title": ".github/workflows/lifecycle.yml: contract job (check + contract test + brew style on the tapped formula with the publisher's exceptions) and brew-lifecycle matrix (macos-14 native, ubuntu-22.04 native, ubuntu-22.04 headless); push on any branch + workflow_dispatch. Proven by the push run for HEAD: waits for it to finish, then requires exactly 4 jobs all success",
+    "title": ".github/workflows/lifecycle.yml: contract job (check + contract test + brew style on the tapped formula with the publisher's exceptions) and brew-lifecycle matrix (macos-15 native, ubuntu-22.04 native, ubuntu-22.04 headless); push on any branch + workflow_dispatch. Proven by the push run for HEAD: waits for it to finish, then requires exactly 4 jobs all success",
     "check": "docker run -i --rm rhysd/actionlint:latest -no-color -stdin-filename .github/workflows/lifecycle.yml - < .github/workflows/lifecycle.yml && bash scripts/check-ci-run.sh lifecycle.yml \"$(git rev-parse HEAD)\" 4",
     "ac_refs": [
       "AC-1",
@@ -204,3 +204,4 @@ contract test → lifecycle script → workflow proven by the HEAD push run
 - Plan review round 2: Approved. The should-fix, the `check-ci-run.sh` contract, went into the spec's Interfaces. The consider item is taken up: CI downloads the release asset once and passes it through `--release-formula`.
 - Execution: the actionlint flag is `-no-color`; `-color=never` is invalid in actionlint 1.7.12.
 - Execution: actionlint reads the workflow on stdin, because Colima does not share `/Volumes` with containers.
+- Execution, first CI run: the macOS job moved from macos-14 to macos-15, because Homebrew 7.0.6 warns that macOS 14 is unsupported. The hook probe now uses `Kernel.system` (`Formula#system` passed the redirection hash as an argument) and fails when the hook ran without finishing `ensure`. SC2015 is fixed for the runner's shellcheck.

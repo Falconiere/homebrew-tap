@@ -87,8 +87,9 @@ scenario_hook_probe() {
         probe = var/"comemory-hook-probe"
         probe.mkpath
         (probe/"home").write(Dir.home)
-        ok = system(bin/"comemory", "sync", "daemon", "ensure", "--json",
-                    out: (probe/"ensure.json").to_s, err: (probe/"ensure.err").to_s)
+        # Kernel.system: Formula#system would pass the redirection hash as an argument.
+        ok = Kernel.system((bin/"comemory").to_s, "sync", "daemon", "ensure", "--json",
+                           out: (probe/"ensure.json").to_s, err: (probe/"ensure.err").to_s)
         (probe/"exit").write(ok.inspect)
       end
     HOOK
@@ -110,6 +111,9 @@ scenario_hook_probe() {
   jq -e '.state != "running"' "$WORK/probe-status.json" >/dev/null \
     || fail "$s" "a hook-started daemon serves the real data dir"
   [ "$(unit_count)" -eq 0 ] || fail "$s" "the hook installed a unit in $UNIT_DIR: $(unit_files)"
+  if [ -e "$var_dir/home" ] && [ ! -e "$var_dir/exit" ]; then
+    fail "$s" "the hook ran but never finished running ensure; the probe proves nothing"
+  fi
   if [ "$home" = "$HOME" ] && [ "$ok" = true ]; then
     fail "$s" "post_install ran ensure with the real HOME; revisit the channel limitation"
   fi
@@ -125,7 +129,9 @@ scenario_hook_probe() {
 
 scenario_install() {
   local s=install version
-  [ "$(coordinator_count)" -eq 0 ] && [ "$(unit_count)" -eq 0 ] || fail "$s" "machine not clean"
+  if [ "$(coordinator_count)" -ne 0 ] || [ "$(unit_count)" -ne 0 ]; then
+    fail "$s" "machine not clean: $(coordinators) $(unit_files)"
+  fi
   brew_logged "$s" "$WORK/install.log" install "$TAP/comemory"
   caveats_printed "$s" "$WORK/install.log"
 
