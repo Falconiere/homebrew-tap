@@ -1,28 +1,28 @@
 class Toolu < Formula
   desc "Code-quality rules for coding agents, as one native binary"
   homepage "https://github.com/Falconiere/toolu"
-  version "8.1.2"
+  version "8.1.3"
   license "MIT"
 
   on_macos do
     on_arm do
-      url "https://github.com/Falconiere/toolu/releases/download/v8.1.2/toolu-darwin-arm64.tar.gz"
-      sha256 "ebe41f1490c174f099733b89416c53f7de93df29035870a79388b88881949a88"
+      url "https://github.com/Falconiere/toolu/releases/download/v8.1.3/toolu-darwin-arm64.tar.gz"
+      sha256 "f299d45af4b7d55d9e71bfa08c68822a6f67e688aa21384d6f3bbcdb6d22afb9"
     end
     on_intel do
-      url "https://github.com/Falconiere/toolu/releases/download/v8.1.2/toolu-darwin-amd64.tar.gz"
-      sha256 "091fee4f91e622756f22590ce241c3e14702b3332d0f267000a65c0522fb90ea"
+      url "https://github.com/Falconiere/toolu/releases/download/v8.1.3/toolu-darwin-amd64.tar.gz"
+      sha256 "fd85ef3d2c7cd878be300d40256163eeda3d64fe0596ef0d2f00fd307f32fa01"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/Falconiere/toolu/releases/download/v8.1.2/toolu-linux-arm64.tar.gz"
-      sha256 "e0af6130564ac576db7f6913f15153c418877f7bc689a40169618229c97cf2f7"
+      url "https://github.com/Falconiere/toolu/releases/download/v8.1.3/toolu-linux-arm64.tar.gz"
+      sha256 "9dc0cddb846dbc3488aabb782a16760dc37cf9df803339ce5c506f1a743e0bbc"
     end
     on_intel do
-      url "https://github.com/Falconiere/toolu/releases/download/v8.1.2/toolu-linux-amd64.tar.gz"
-      sha256 "7f4d325432a0af9af1c40b19367ce85e5685a5c0c062d3a4559b8a3b44399f73"
+      url "https://github.com/Falconiere/toolu/releases/download/v8.1.3/toolu-linux-amd64.tar.gz"
+      sha256 "7c5c9725685efd4643c93b83d30e057f7064d75894208d8a5655baf9a42301c5"
     end
   end
 
