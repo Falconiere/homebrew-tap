@@ -8,13 +8,14 @@ Actions runner.
 
 ```bash
 brew tap Falconiere/tap
-brew trust --tap Falconiere/tap
+brew trust --formula Falconiere/tap/toolu
 brew install Falconiere/tap/toolu
 ```
 
 Homebrew 7 will not load formulae from a third-party tap until you trust them.
-`brew trust --tap` trusts every formula in this tap. To trust only the ones you
-install, run `brew trust --formula Falconiere/tap/<formula>` for each one.
+`brew trust --formula` trusts one formula, so repeat it for each one you
+install. `brew trust --tap Falconiere/tap` trusts every formula in this tap,
+including any added later; use it only if you accept that.
 
 ## Formulae
 
@@ -38,6 +39,9 @@ these commands after every install, upgrade and reinstall.
 
 ```bash
 # Install, then start and verify the daemon
+# (Homebrew 7 loads formulae from third-party taps only after `brew trust`)
+brew tap Falconiere/tap
+brew trust --formula Falconiere/tap/comemory
 brew install Falconiere/tap/comemory
 "$(brew --prefix)/opt/comemory/bin/comemory" sync daemon ensure
 
@@ -78,12 +82,17 @@ The formula installs the `toolu` binary. Then install its plugins into your
 coding-agent hosts:
 
 ```bash
+brew tap Falconiere/tap
+brew trust --formula Falconiere/tap/toolu
 brew install Falconiere/tap/toolu
 toolu plugins install
 ```
 
-Supported hosts, pinning and rollback are covered in toolu's
+Supported hosts are listed in toolu's
 [docs/install.md](https://github.com/Falconiere/toolu/blob/main/docs/install.md).
+Its version pinning and rollback use the curl installer, which refuses to
+replace a Homebrew-installed `toolu`; on this channel, use `brew upgrade toolu`
+and `brew uninstall toolu`.
 
 ## toolu-runner
 
@@ -91,6 +100,8 @@ The formula installs the binary only. The guided setup registers the runner,
 installs its background service, and confirms the runner is online:
 
 ```bash
+brew tap Falconiere/tap
+brew trust --formula Falconiere/tap/toolu-runner
 brew install Falconiere/tap/toolu-runner
 toolu-runner setup
 ```
@@ -100,8 +111,9 @@ Unattended flags and service management are covered in the
 
 ## Maintaining this tap
 
-Each project's release automation regenerates and pushes its own formula, so
-version bumps need no manual edits here:
+Each project's release automation normally regenerates and pushes its own
+formula. When a release does not show up here, bump the formula by hand from
+the same source:
 
 - `comemory` and `git-better` come from cargo-dist.
 - `toolu` and `toolu-runner` come from each stable release's `SHA256SUMS`.
@@ -118,6 +130,9 @@ ruby scripts/comemory_formula.rb check Formula/comemory.rb   # fail if either is
 CI (`.github/workflows/lifecycle.yml`) runs `check` on every push, including
 release pushes. It also runs real `brew install`, `reinstall`, `upgrade` and
 `uninstall` on macOS (launchd) and Linux (systemd and headless) against this
-tap. Those runs use `scripts/test-brew-lifecycle.sh`, and
-`scripts/test-formula-contract.sh` checks that this README still documents the
-comemory daemon lifecycle.
+tap. Those runs use `scripts/test-brew-lifecycle.sh`.
+
+A separate `contract` job runs `scripts/test-formula-contract.sh`. Among its
+checks, it greps this README for the comemory daemon commands and the
+channel-support note. CI does not check the formulae table, the links or the
+toolu and toolu-runner sections.

@@ -10,8 +10,9 @@
   `.github/workflows/lifecycle.yml`, and upstream READMEs for toolu
   (`toolu plugins install`) and toolu-ghrunner (`toolu-runner setup`).
 - **Probed:** `brew trust --help` on Homebrew 7.0.11. A throwaway
-  `XDG_CONFIG_HOME` refuses an untrusted load and loads all four formulae
-  after `brew trust --tap Falconiere/tap`. The user's trust store is untouched.
+  `XDG_CONFIG_HOME` refuses an untrusted load. `brew trust --formula` loads
+  only that formula, and `brew trust --tap Falconiere/tap` loads all four. The
+  user's trust store is untouched.
 - **Memory:** comemory MCP was unavailable and the wrapper had no hits for this repo.
 - **Approach:** the spec's catalog layout. The comemory text moves under its
   own heading with its wording kept; its maintainer notes move into
@@ -46,7 +47,7 @@ repo gate and diff scope.
   {
     "id": "S2-contract",
     "title": "comemory contract strings survive the rewrite",
-    "check": "out=$(env -u GH_TOKEN bash scripts/test-formula-contract.sh 2>&1) || { printf '%s\\n' \"$out\" | grep -E '^FAIL'; exit 1; }; printf '%s\\n' \"$out\" | grep -qx 'PASS README documents the Homebrew daemon lifecycle and its limitation' && printf '%s\\n' \"$out\" | tail -1 | grep -qx 'all contract cases passed' && echo 'AC-3 ok'",
+    "check": "out=$(bash scripts/test-formula-contract.sh 2>&1) || { printf '%s\\n' \"$out\" | grep -E '^FAIL'; exit 1; }; printf '%s\\n' \"$out\" | grep -qx 'PASS README documents the Homebrew daemon lifecycle and its limitation' && printf '%s\\n' \"$out\" | tail -1 | grep -qx 'all contract cases passed' && echo 'AC-3 ok'",
     "ac_refs": [
       "AC-3"
     ],
@@ -63,8 +64,8 @@ repo gate and diff scope.
   },
   {
     "id": "S3-quickstart",
-    "title": "Quick start trust command loads every formula from an empty trust store",
-    "check": "t=$(mktemp -d); trap 'rm -rf \"$t\"' EXIT; export XDG_CONFIG_HOME=\"$t\" HOMEBREW_NO_AUTO_UPDATE=1; if brew info --formula Falconiere/tap/git-better >/dev/null 2>\"$t/err\"; then echo 'AC-4: untrusted load succeeded'; exit 1; fi; grep -q 'Refusing to load formula' \"$t/err\" || { cat \"$t/err\"; exit 1; }; grep -qxE 'brew tap Falconiere/tap( +#.*)?' README.md && grep -qxE 'brew trust --tap Falconiere/tap( +#.*)?' README.md || { echo 'AC-4: quick start lines missing'; exit 1; }; brew trust --tap Falconiere/tap >/dev/null || { echo \\\"AC-4: brew trust failed\\\"; exit 1; }; for f in Formula/*.rb; do b=$(basename \"$f\" .rb); brew info --formula \"Falconiere/tap/$b\" >/dev/null || { echo \"AC-4: $b not loadable\"; exit 1; }; done; grep -qF 'brew trust --formula Falconiere/tap/' README.md && echo 'AC-4 ok'",
+    "title": "Quick start trusts one formula; the named --tap option trusts all; every block trusts before it installs",
+    "check": "t=$(mktemp -d); trap 'rm -rf \"$t\"' EXIT; export XDG_CONFIG_HOME=\"$t\" HOMEBREW_NO_AUTO_UPDATE=1; if brew info --formula Falconiere/tap/git-better >/dev/null 2>\"$t/err\"; then echo 'AC-4: untrusted load succeeded'; exit 1; fi; grep -q 'Refusing to load formula' \"$t/err\" || { cat \"$t/err\"; exit 1; }; for l in 'brew tap Falconiere/tap' 'brew trust --formula Falconiere/tap/toolu' 'brew install Falconiere/tap/toolu'; do grep -qxF -- \"$l\" README.md || { echo \"AC-4: quick start lacks: $l\"; exit 1; }; done; grep -qF 'brew trust --tap Falconiere/tap' README.md || { echo 'AC-4: --tap option not named'; exit 1; }; brew trust --formula Falconiere/tap/toolu >/dev/null || { echo 'AC-4: brew trust --formula failed'; exit 1; }; brew info --formula Falconiere/tap/toolu >/dev/null || { echo 'AC-4: toolu not loadable after --formula trust'; exit 1; }; if brew info --formula Falconiere/tap/git-better >/dev/null 2>&1; then echo 'AC-4: --formula trust widened to git-better'; exit 1; fi; brew trust --tap Falconiere/tap >/dev/null || { echo 'AC-4: brew trust --tap failed'; exit 1; }; for f in Formula/*.rb; do b=$(basename \"$f\" .rb); brew info --formula \"Falconiere/tap/$b\" >/dev/null || { echo \"AC-4: $b not loadable\"; exit 1; }; done; awk '/^```/{inb=!inb; delete tr; tap=0; next} inb && /^brew trust --tap Falconiere\\/tap/{tap=1} inb && /^brew trust --formula Falconiere\\/tap\\//{split($4,p,\"/\"); tr[p[3]]=1} inb && /^brew install Falconiere\\/tap\\//{split($3,p,\"/\"); if(!tap && !(p[3] in tr)){print \"AC-4: install before trust: \" $0; bad=1}} END{exit bad}' README.md && echo 'AC-4 ok'",
     "ac_refs": [
       "AC-4"
     ],
@@ -94,8 +95,8 @@ repo gate and diff scope.
   },
   {
     "id": "S5-links",
-    "title": "Every URL answers 200 and every in-page anchor resolves",
-    "check": "for u in $(grep -oE 'https://[^]) >`\"]+' README.md | sort -u); do c=$(curl -sL -o /dev/null -w '%{http_code}' \"$u\"); [ \"$c\" = 200 ] || { echo \"AC-6: $u -> $c\"; exit 1; }; done; slugs=$(grep -E '^#+ ' README.md | sed -E 's/^#+ //' | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9 -]//g; s/ /-/g'); for a in $(grep -oE '[]][(]#[a-z0-9-]+[)]' README.md | sed -E 's/^[]][(]#//; s/[)]$//' | sort -u); do printf '%s\\n' \"$slugs\" | grep -qx -- \"$a\" || { echo \"AC-6: missing anchor $a\"; exit 1; }; done; echo 'AC-6 ok'",
+    "title": "Every URL answers 200; every in-page anchor and GitHub URL fragment resolves",
+    "check": "for u in $(grep -oE 'https://[^]) >`\"]+' README.md | sort -u); do c=$(curl -sL -o /dev/null -w '%{http_code}' \"$u\"); [ \"$c\" = 200 ] || { echo \"AC-6: $u -> $c\"; exit 1; }; done; slugs=$(grep -E '^#+ ' README.md | sed -E 's/^#+ //' | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9 _-]//g; s/ /-/g'); for a in $(grep -oE '[]][(]#[a-z0-9_-]+[)]' README.md | sed -E 's/^[]][(]#//; s/[)]$//' | sort -u); do printf '%s\\n' \"$slugs\" | grep -qx -- \"$a\" || { echo \"AC-6: missing anchor $a\"; exit 1; }; done; for u in $(grep -oE 'https://[^]) >`\"]+#[A-Za-z0-9_-]+' README.md | sort -u); do frag=${u##*#}; base=${u%%#*}; case \"$base\" in https://github.com/*/*/blob/*) raw=$(printf '%s' \"$base\" | sed -E 's#^https://github[.]com/([^/]+)/([^/]+)/blob/#https://raw.githubusercontent.com/\\1/\\2/#') ;; https://github.com/*/*) raw=$(printf '%s' \"${base%/}/HEAD/README.md\" | sed 's#^https://github[.]com/#https://raw.githubusercontent.com/#') ;; *) echo \"AC-6: cannot verify fragment on $u\"; exit 1 ;; esac; curl -fsSL \"$raw\" | grep -E '^#+ ' | sed -E 's/^#+ //' | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9 _-]//g; s/ /-/g' | grep -qx -- \"$frag\" || { echo \"AC-6: no heading for #$frag in $raw\"; exit 1; }; done; echo 'AC-6 ok'",
     "ac_refs": [
       "AC-6"
     ],
@@ -145,8 +146,8 @@ repo gate and diff scope.
 - Docs: README is the deliverable; no other surface changes.
 - Delivery: scoped `docs:` commit on `docs/readme-catalog`, `toolu-review:review`,
   `toolu ledger verdict status` reporting ready, push, PR against `main`, then
-  `pr-babysit:babysit`. Prerequisite: `gh` runs with `env -u GH_TOKEN` because
-  the env token is invalid. The keyring login (`Falconiere`) is valid.
+  `pr-babysit:babysit`. Prerequisite: an authenticated `gh` (S2 downloads the
+  latest comemory release formula).
 
 ## Plan review
 
@@ -155,3 +156,11 @@ repo gate and diff scope.
 - S5-links: 🔵 consider: already green before the rewrite. Kept as a regression guard for the new links.
 
 **Status:** Approved
+
+## Deviations
+
+After `/code-review high` on PR #3 (see the spec's revision section):
+
+- S2-contract: the check no longer hard-codes `env -u GH_TOKEN`; it needs an authenticated `gh`.
+- S3-quickstart: now proves the narrow `--formula` default (git-better stays refused after trusting toolu), the opt-in `--tap` path, and that every README code block trusts its formula before `brew install`. Its failure message no longer prints literal quotes. Red on the pre-fix README: `AC-4: quick start lacks: brew trust --formula Falconiere/tap/toolu`, and the block scan flags the comemory, toolu and toolu-runner install lines.
+- S5-links: now also checks fragments on GitHub URLs against the target Markdown's headings. Red on a README with `#no-such-heading`.
