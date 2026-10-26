@@ -1,6 +1,32 @@
-# homebrew-tap
+# Falconiere/tap
 
-Homebrew tap for Falconiere projects.
+Homebrew formulae for Falconiere's developer tools: memory and code-quality
+rules for coding agents, a token-lean git companion, and a self-hosted GitHub
+Actions runner.
+
+## Quick start
+
+```bash
+brew tap Falconiere/tap
+brew trust --tap Falconiere/tap
+brew install Falconiere/tap/toolu
+```
+
+Homebrew 7 will not load formulae from a third-party tap until you trust them.
+`brew trust --tap` trusts every formula in this tap. To trust only the ones you
+install, run `brew trust --formula Falconiere/tap/<formula>` for each one.
+
+## Formulae
+
+| Formula | Command | What it does | Platforms |
+| --- | --- | --- | --- |
+| [`comemory`](https://github.com/Falconiere/comemory) | `comemory` | Agentic dev memory and code-aware semantic search over a two-layer property graph. Needs its sync daemon started; see [comemory](#comemory). | macOS arm64, Linux x86_64/arm64 |
+| [`git-better`](https://github.com/Falconiere/git-better) | `gb` | Token-lean git companion for humans and LLM agents. | macOS arm64, Linux x86_64/arm64 |
+| [`toolu`](https://github.com/Falconiere/toolu) | `toolu` | Code-quality rules for coding agents, as one native binary. Plugins install separately; see [toolu](#toolu). | macOS arm64/x86_64, Linux x86_64/arm64 |
+| [`toolu-runner`](https://github.com/Falconiere/toolu-ghrunner) | `toolu-runner` | Standalone self-hosted GitHub Actions JIT runner. Needs a one-time setup; see [toolu-runner](#toolu-runner). | macOS arm64/x86_64, Linux x86_64/arm64 |
+
+Each formula follows its project's latest release. `brew upgrade <formula>` and
+`brew uninstall <formula>` work as usual; comemory adds a daemon step, below.
 
 ## comemory
 
@@ -12,9 +38,6 @@ these commands after every install, upgrade and reinstall.
 
 ```bash
 # Install, then start and verify the daemon
-# (Homebrew 7 loads formulae from third-party taps only after `brew trust`)
-brew tap Falconiere/tap
-brew trust --formula Falconiere/tap/comemory
 brew install Falconiere/tap/comemory
 "$(brew --prefix)/opt/comemory/bin/comemory" sync daemon ensure
 
@@ -49,7 +72,39 @@ in comemory's
 and
 [docs/guides/upgrading.md](https://github.com/Falconiere/comemory/blob/main/docs/guides/upgrading.md).
 
-### Maintaining the formula
+## toolu
+
+The formula installs the `toolu` binary. Then install its plugins into your
+coding-agent hosts:
+
+```bash
+brew install Falconiere/tap/toolu
+toolu plugins install
+```
+
+Supported hosts, pinning and rollback are covered in toolu's
+[docs/install.md](https://github.com/Falconiere/toolu/blob/main/docs/install.md).
+
+## toolu-runner
+
+The formula installs the binary only. The guided setup registers the runner,
+installs its background service, and confirms the runner is online:
+
+```bash
+brew install Falconiere/tap/toolu-runner
+toolu-runner setup
+```
+
+Unattended flags and service management are covered in the
+[toolu-runner quick start](https://github.com/Falconiere/toolu-ghrunner#quick-start).
+
+## Maintaining this tap
+
+Each project's release automation regenerates and pushes its own formula, so
+version bumps need no manual edits here:
+
+- `comemory` and `git-better` come from cargo-dist.
+- `toolu` and `toolu-runner` come from each stable release's `SHA256SUMS`.
 
 cargo-dist regenerates `Formula/comemory.rb` on every comemory release. The
 hand-maintained parts, shell completions and the lifecycle caveats, are owned by
@@ -63,4 +118,6 @@ ruby scripts/comemory_formula.rb check Formula/comemory.rb   # fail if either is
 CI (`.github/workflows/lifecycle.yml`) runs `check` on every push, including
 release pushes. It also runs real `brew install`, `reinstall`, `upgrade` and
 `uninstall` on macOS (launchd) and Linux (systemd and headless) against this
-tap. Those runs use `scripts/test-brew-lifecycle.sh`.
+tap. Those runs use `scripts/test-brew-lifecycle.sh`, and
+`scripts/test-formula-contract.sh` checks that this README still documents the
+comemory daemon lifecycle.
